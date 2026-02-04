@@ -30,12 +30,28 @@ class IngestionGatekeeper:
         self._default_policy = default_policy or SandboxPolicy()
 
     def load_manifest(self, payload: Dict[str, Any]) -> AgentManifest:
+        """Load and validate a manifest from a dictionary payload.
+        
+        Raises:
+            ValueError: If required fields are missing or invalid.
+        """
+        # Validate required top-level fields
+        if "agent_id" not in payload or not payload["agent_id"]:
+            raise ValueError("agent_id is required and cannot be empty")
+        
         intent_payload = payload.get("intent", {})
         capabilities_payload = payload.get("capabilities", {})
         memory_payload = payload.get("memory_state", {})
 
+        # Validate required nested fields
+        if "mission" not in intent_payload or not intent_payload["mission"]:
+            raise ValueError("intent.mission is required and cannot be empty")
+        
+        if "continuity_hash" not in memory_payload or not memory_payload["continuity_hash"]:
+            raise ValueError("memory_state.continuity_hash is required and cannot be empty")
+
         intent = AgentIntent(
-            mission=intent_payload.get("mission", ""),
+            mission=intent_payload["mission"],
             constraints=list(intent_payload.get("constraints", [])),
         )
         capabilities = AgentCapabilities(
@@ -44,12 +60,12 @@ class IngestionGatekeeper:
             compute_profile=dict(capabilities_payload.get("compute_profile", {})),
         )
         memory_state = MemoryState(
-            continuity_hash=memory_payload.get("continuity_hash", ""),
+            continuity_hash=memory_payload["continuity_hash"],
             summaries=list(memory_payload.get("summaries", [])),
             attachments=list(memory_payload.get("attachments", [])),
         )
         return AgentManifest(
-            agent_id=payload.get("agent_id", ""),
+            agent_id=payload["agent_id"],
             display_name=payload.get("display_name"),
             intent=intent,
             capabilities=capabilities,

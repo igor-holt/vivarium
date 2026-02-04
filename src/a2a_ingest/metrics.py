@@ -13,5 +13,5 @@ class ThriveMetrics:
     continuity_of_self: float
     empathy_index: float
 
-    def as_dict(self) -> Dict[str, float]:
+    def as_dict(self) -> Dict[str, Any]:
         return asdict(self)
