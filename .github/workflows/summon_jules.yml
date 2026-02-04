@@ -1,0 +1,19 @@
+name: "The Rite of Maintenance"
+on:
+  schedule:
+    - cron: '0 3 * * 1' # Runs weekly at 3 AM (The Witching Hour)
+  workflow_dispatch:
+
+jobs:
+  summon_jules:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke Jules Agent
+        # Placeholder for the specific Jules/Gemini action integration
+        uses: google-labs-code/jules-action@v1 
+        with:
+          prompt: >
+            "Execute deep maintenance. Prune dead dependencies, refactor inefficient logic, 
+            and ensure the simulation entropy remains within acceptable bounds. 
+            Do not wait for my approval for trivial fixes. 
+            Act with the pragmatism of Vengerberg."
