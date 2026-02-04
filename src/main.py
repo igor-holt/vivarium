@@ -112,11 +112,11 @@ async def ingest_celestial_body(payload: AgentManifestPayload) -> AdmissionTicke
         raise HTTPException(status_code=400, detail={"reasons": decision.reasons})
 
     body = gatekeeper.transform_to_celestial_body(manifest)
-    
+
     # Prevent unauthorized overwriting of existing agent IDs
     if body.body_id in celestial_registry:
         raise HTTPException(status_code=409, detail="Agent ID already registered")
-    
+
     celestial_registry[body.body_id] = body
     orbit = _orbit_from_body(body)
     return AdmissionTicket(body_id=body.body_id, orbit=orbit)
