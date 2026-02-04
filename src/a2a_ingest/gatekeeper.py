@@ -37,7 +37,7 @@ class IngestionGatekeeper:
         """
         # Validate required top-level fields
         if "agent_id" not in payload or not payload["agent_id"]:
-            raise ValueError("agent_id is required and cannot be empty")
+            raise ValueError("Missing or empty required field: agent_id")
         
         intent_payload = payload.get("intent", {})
         capabilities_payload = payload.get("capabilities", {})
@@ -45,10 +45,10 @@ class IngestionGatekeeper:
 
         # Validate required nested fields
         if "mission" not in intent_payload or not intent_payload["mission"]:
-            raise ValueError("intent.mission is required and cannot be empty")
+            raise ValueError("Missing or empty required field: intent.mission")
         
         if "continuity_hash" not in memory_payload or not memory_payload["continuity_hash"]:
-            raise ValueError("memory_state.continuity_hash is required and cannot be empty")
+            raise ValueError("Missing or empty required field: memory_state.continuity_hash")
 
         intent = AgentIntent(
             mission=intent_payload["mission"],
