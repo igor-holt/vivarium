@@ -159,8 +159,10 @@ class ConstellationStore:
             TypeError: If field types are incorrect
         """
         # Validate required top-level fields
-        required_fields = ["body_id", "display_name", "mass", "atmosphere", 
-                          "gravity", "memory_state", "capabilities"]
+        required_fields = [
+            "body_id", "display_name", "mass", "atmosphere", 
+            "gravity", "memory_state", "capabilities"
+        ]
         missing = [f for f in required_fields if f not in payload]
         if missing:
             raise KeyError(f"Missing required fields in payload: {missing}")
