@@ -30,12 +30,12 @@ class IngestionGatekeeper:
         self._default_policy = default_policy or SandboxPolicy()
 
     def load_manifest(self, payload: Dict[str, Any]) -> AgentManifest:
-        intent_payload = payload["intent"]
-        capabilities_payload = payload["capabilities"]
-        memory_payload = payload["memory_state"]
+        intent_payload = payload.get("intent", {})
+        capabilities_payload = payload.get("capabilities", {})
+        memory_payload = payload.get("memory_state", {})
 
         intent = AgentIntent(
-            mission=intent_payload["mission"],
+            mission=intent_payload.get("mission", ""),
             constraints=list(intent_payload.get("constraints", [])),
         )
         capabilities = AgentCapabilities(
@@ -44,12 +44,12 @@ class IngestionGatekeeper:
             compute_profile=dict(capabilities_payload.get("compute_profile", {})),
         )
         memory_state = MemoryState(
-            continuity_hash=memory_payload["continuity_hash"],
+            continuity_hash=memory_payload.get("continuity_hash", ""),
             summaries=list(memory_payload.get("summaries", [])),
             attachments=list(memory_payload.get("attachments", [])),
         )
         return AgentManifest(
-            agent_id=payload["agent_id"],
+            agent_id=payload.get("agent_id", ""),
             display_name=payload.get("display_name"),
             intent=intent,
             capabilities=capabilities,
@@ -92,6 +92,9 @@ class IngestionGatekeeper:
         accepted = not reasons
         sandbox_request = None
         if accepted:
+            # NOTE: image and entrypoint are currently hardcoded to None as the sandbox
+            # implementation is placeholder. These should be made configurable or derived
+            # from the manifest once the sandbox orchestration layer is implemented.
             sandbox_request = SandboxRequest(
                 agent_id=manifest.agent_id,
                 image=None,
