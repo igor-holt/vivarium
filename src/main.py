@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
@@ -22,7 +22,7 @@ class IntentPayload(BaseModel):
 class CapabilitiesPayload(BaseModel):
     interfaces: List[str] = Field(default_factory=list)
     skills: List[str] = Field(default_factory=list)
-    compute_profile: Dict[str, float] = Field(default_factory=dict)
+    compute_profile: Dict[str, Any] = Field(default_factory=dict)
 
 
 class MemoryPayload(BaseModel):
@@ -55,6 +55,12 @@ knowledge_graph = InMemoryKnowledgeGraph()
 
 gatekeeper = IngestionGatekeeper(knowledge_graph)
 
+# NOTE: celestial_registry is an in-memory dictionary without persistence.
+# - Data will be lost on server restart or crash
+# - Not suitable for horizontal scaling (multiple instances)
+# - Unbounded growth can lead to memory exhaustion
+# For production use, integrate a persistent storage solution (database, distributed cache)
+# and implement rate limiting to prevent DoS attacks.
 celestial_registry: Dict[str, CelestialBody] = {}
 
 
@@ -106,6 +112,11 @@ async def ingest_celestial_body(payload: AgentManifestPayload) -> AdmissionTicke
         raise HTTPException(status_code=400, detail={"reasons": decision.reasons})
 
     body = gatekeeper.transform_to_celestial_body(manifest)
+
+    # Prevent unauthorized overwriting of existing agent IDs
+    if body.body_id in celestial_registry:
+        raise HTTPException(status_code=409, detail="Agent ID already registered")
+
     celestial_registry[body.body_id] = body
     orbit = _orbit_from_body(body)
     return AdmissionTicket(body_id=body.body_id, orbit=orbit)

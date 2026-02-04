@@ -114,13 +114,13 @@ class CelestialBody:
             "gravity": self.gravity,
             "memory_state": {
                 "continuity_hash": self.memory_state.continuity_hash,
-                "summaries": list(self.memory_state.summaries),
-                "attachments": list(self.memory_state.attachments),
+                "summaries": self.memory_state.summaries,
+                "attachments": self.memory_state.attachments,
             },
             "capabilities": {
-                "interfaces": list(self.capabilities.interfaces),
-                "skills": list(self.capabilities.skills),
-                "compute_profile": dict(self.capabilities.compute_profile),
+                "interfaces": self.capabilities.interfaces,
+                "skills": self.capabilities.skills,
+                "compute_profile": self.capabilities.compute_profile,
             },
-            "trust": dict(self.trust),
+            "trust": self.trust,
         }

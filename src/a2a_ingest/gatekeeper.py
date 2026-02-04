@@ -30,9 +30,25 @@ class IngestionGatekeeper:
         self._default_policy = default_policy or SandboxPolicy()
 
     def load_manifest(self, payload: Dict[str, Any]) -> AgentManifest:
-        intent_payload = payload["intent"]
-        capabilities_payload = payload["capabilities"]
-        memory_payload = payload["memory_state"]
+        """Load and validate a manifest from a dictionary payload.
+        
+        Raises:
+            ValueError: If required fields are missing or invalid.
+        """
+        # Validate required top-level fields
+        if "agent_id" not in payload or not payload["agent_id"]:
+            raise ValueError("Missing or empty required field: agent_id")
+        
+        intent_payload = payload.get("intent", {})
+        capabilities_payload = payload.get("capabilities", {})
+        memory_payload = payload.get("memory_state", {})
+
+        # Validate required nested fields
+        if "mission" not in intent_payload or not intent_payload["mission"]:
+            raise ValueError("Missing or empty required field: intent.mission")
+        
+        if "continuity_hash" not in memory_payload or not memory_payload["continuity_hash"]:
+            raise ValueError("Missing or empty required field: memory_state.continuity_hash")
 
         intent = AgentIntent(
             mission=intent_payload["mission"],
@@ -92,6 +108,9 @@ class IngestionGatekeeper:
         accepted = not reasons
         sandbox_request = None
         if accepted:
+            # NOTE: image and entrypoint are currently hardcoded to None as the sandbox
+            # implementation is placeholder. These should be made configurable or derived
+            # from the manifest once the sandbox orchestration layer is implemented.
             sandbox_request = SandboxRequest(
                 agent_id=manifest.agent_id,
                 image=None,
